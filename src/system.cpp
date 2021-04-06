@@ -15,8 +15,9 @@ using std::string;
 using std::vector;
 
 System::System() {
-    this->operatingSystem_= LinuxParser::OperatingSystem();
-    this->kernel_ = LinuxParser::Kernel();
+    operatingSystem_= LinuxParser::OperatingSystem();
+    kernel_ = LinuxParser::Kernel();
+    cpu_ = Processor();
 }
 
 // TODO: Return the system's CPU
@@ -25,13 +26,11 @@ Processor& System::Cpu() { return cpu_; }
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() { return processes_; }
 
-// TODO: Return the system's kernel identifier (string)
 std::string System::Kernel() { return this->kernel_; }
 
 // TODO: Return the system's memory utilization
 float System::MemoryUtilization() { return 0.0; }
 
-// TODO: Return the operating system name
 std::string System::OperatingSystem() { return this->operatingSystem_; }
 
 // TODO: Return the number of processes actively running on the system
