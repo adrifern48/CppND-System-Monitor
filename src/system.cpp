@@ -18,6 +18,7 @@ System::System() {
     operatingSystem_= LinuxParser::OperatingSystem();
     kernel_ = LinuxParser::Kernel();
     cpu_ = Processor();
+    auto test = LinuxParser::CpuUtilization();
 }
 
 // TODO: Return the system's CPU

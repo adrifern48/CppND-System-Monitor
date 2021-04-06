@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <iostream> // just used for testing
+
 #include "linux_parser.h"
 
 using std::stof;
@@ -93,11 +95,27 @@ vector<string> LinuxParser::CpuUtilization() {
   string user, nice, system, idle, iowait;
   string irq, softirq, steal, guest, guestNice;
   string line;
-  std::ifstream stream(kProcDirectory + kVersionFilename);
+  std::ifstream stream(kProcDirectory + kStatFilename);
   if (stream.is_open()) {
+    vector<string> cpuFields;
     std::getline(stream, line);
     std::istringstream linestream(line);
-    linestream >> os >> version >> kernel;
+    linestream.ignore(string("cpu").length());
+    linestream >> user >> nice >> system >> idle >> iowait 
+      >> irq >> softirq >> steal >> guest >> guestNice;
+    cpuFields.push_back(user);
+    cpuFields.push_back(nice);
+    cpuFields.push_back(system);
+    cpuFields.push_back(idle);
+    cpuFields.push_back(iowait);
+    cpuFields.push_back(irq);
+    cpuFields.push_back(softirq);
+    cpuFields.push_back(steal);
+    cpuFields.push_back(guest);
+    cpuFields.push_back(guestNice);
+
+    // std::cout << user << ", " << nice << ", " << system << ", " << idle << ", " << iowait << ", " << irq << ", " << softirq << ", " << steal << ", " << guest << ", " << guestNice << ", " << "\n";
+    return cpuFields;
   }
   
   return {}; 
