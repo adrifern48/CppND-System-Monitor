@@ -6,8 +6,8 @@ class Processor {
   float Utilization();  // TODO: See src/processor.cpp
 
  private:
-  unsigned long long int userTime_, niceTime_, systemTime_, idleTime_;
-  unsigned long long int ioWait_, irq_, softIrq_, steal_, guest_, guestNice_;
+  unsigned long long int pUser, pNice, pSystem, pIdle = 0;
+  unsigned long long int pIoWait, pIrq, pSoftIrq, pSteal, pGuest, pGuestNice = 0;
   float utilization_;
 };
 
