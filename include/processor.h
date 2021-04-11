@@ -3,12 +3,10 @@
 
 class Processor {
  public:
-  float Utilization();  // TODO: See src/processor.cpp
+  float Utilization();
 
  private:
-  unsigned long long int pUser, pNice, pSystem, pIdle = 0;
-  unsigned long long int pIoWait, pIrq, pSoftIrq, pSteal, pGuest, pGuestNice = 0;
-  float utilization_;
+  float prevIdle_, prevTotal_ = 0.f;
 };
 
 #endif
