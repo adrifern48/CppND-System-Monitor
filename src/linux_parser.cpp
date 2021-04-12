@@ -84,8 +84,18 @@ float LinuxParser::MemoryUtilization() {
   return utilization; 
 }
 
-// TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() { 
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+    string line, uptime;
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    linestream >> uptime;
+    return std::stol(uptime);
+  }
+
+  return 0; 
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
@@ -101,8 +111,6 @@ long LinuxParser::ActiveJiffies() { return 0; }
 long LinuxParser::IdleJiffies() { return 0; }
 
 vector<string> LinuxParser::CpuUtilization() { 
-  //       user    nice   system  idle      iowait irq   softirq  steal  guest  guest_nice
-  //cpu    74608   2520   24433   1117073   6176   4054  0        0      0      0    
   std::ifstream stream(kProcDirectory + kStatFilename);
   if (stream.is_open()) {
     string user, nice, system, idle, iowait;
@@ -125,7 +133,6 @@ vector<string> LinuxParser::CpuUtilization() {
     cpuFields.push_back(guest);
     cpuFields.push_back(guestNice);
 
-    // std::cout << user << ", " << nice << ", " << system << ", " << idle << ", " << iowait << ", " << irq << ", " << softirq << ", " << steal << ", " << guest << ", " << guestNice << ", " << "\n";
     return cpuFields;
   }
   
