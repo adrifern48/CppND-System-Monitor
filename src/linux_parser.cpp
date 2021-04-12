@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <iostream> // just used for testing
-
 #include "linux_parser.h"
 
 using std::stof;
@@ -69,8 +67,22 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+float LinuxParser::MemoryUtilization() { 
+  float utilization = 0.f;
+  std::ifstream stream(kProcDirectory + kMeminfoFilename);
+  if (stream.is_open()) {
+    string key, val, unit;
+    float memTotal, memFree = 0.f;
+    while (stream >> key >> val >> unit) {
+      if ("MemTotal:" == key) memTotal = std::stof(val);
+      else if ("MemFree:" == key) memFree = std::stof(val);
+    }
+
+    utilization = (memTotal - memFree) / memTotal;
+  }
+
+  return utilization; 
+}
 
 // TODO: Read and return the system uptime
 long LinuxParser::UpTime() { return 0; }
@@ -88,7 +100,6 @@ long LinuxParser::ActiveJiffies() { return 0; }
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() { return 0; }
 
-// TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() { 
   //       user    nice   system  idle      iowait irq   softirq  steal  guest  guest_nice
   //cpu    74608   2520   24433   1117073   6176   4054  0        0      0      0    

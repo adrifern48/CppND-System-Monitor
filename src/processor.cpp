@@ -1,6 +1,5 @@
 #include "processor.h"
 #include "linux_parser.h"
-#include <math.h>
 
 using namespace std;
 
@@ -35,7 +34,7 @@ float Processor::Utilization() {
 
             utilization = (totald - idled) / totald;           
         } catch (const std::out_of_range& e) {
-            return NAN;
+            throw e;
         }
     }
     return utilization;
