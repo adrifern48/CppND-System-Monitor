@@ -18,7 +18,6 @@ class System {
   std::string Kernel() const;
   std::string OperatingSystem() const;
 
-  // TODO: Define any necessary private members
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};
