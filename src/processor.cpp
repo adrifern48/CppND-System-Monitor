@@ -1,8 +1,6 @@
 #include "processor.h"
 #include "linux_parser.h"
 
-using namespace std;
-
 float Processor::Utilization() {
     float utilization = 0.0f;
     auto cpuFields = LinuxParser::CpuUtilization();
