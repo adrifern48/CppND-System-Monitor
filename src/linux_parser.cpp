@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm> // might not need this
 
 #include "linux_parser.h"
 
@@ -163,21 +164,78 @@ int LinuxParser::RunningProcesses() {
   return runningProcesses;
 }
 
+void replaceAll(string& str, const string& from, const string& to) {
+  if (from.empty())
+    return;
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length();
+  }
+}
+
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Command(int pid) { 
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kCmdlineFilename);
+  string cmd;
+  if (filestream.is_open()) {
+    string line;
+    std::getline(filestream, line);
+    // replaceAll(line, {'\000'}, "");
+    // line.erase(std::find(line.begin(), line.end(), L'\000'), line.end());
+    cmd = line;
+      
+    // /bin/sh-c/usr/local/bin/start_desktop.sh but I only see /bin/sh
+    // reason is because there are \000 characters in the string so the first occurence acts as null terminator
+    // TODO: fix this! I tried above but it's not working
+  }
+
+  return cmd; 
+}
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
 
-// TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
+//  Read and return the user ID associated with a process
+string LinuxParser::Uid(int pid) { 
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatusFilename);
+  string value;
+  if (filestream.is_open()) {
+    string line;
+    string key;
+    while (std::getline(filestream, line)) {
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == "Uid:") 
+          return value; // capture the first integer on the "Uid:" line
+      }
+    }
+  }
+  
+  return value; 
+}
 
-// TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+// Read and return the user associated with a process
+string LinuxParser::User(int pid) { 
+  std::ifstream filestream(kPasswordPath);
+  string user;
+  if (filestream.is_open()) {
+    string uid = Uid(pid);
+    string line;
+    string password, potentialUid;
+    while (std::getline(filestream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> user >> password >> potentialUid) {
+        if (uid == potentialUid) return user;  
+      }
+    }
+  }
+  
+  return user;
+}
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
