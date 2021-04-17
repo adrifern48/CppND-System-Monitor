@@ -2,11 +2,12 @@
 #include "system.h"
 
 #include <iostream> //used for testing
-#include "process.h"
+#include "linux_parser.h"
 
 int main() {
   System system;
-  NCursesDisplay::Display(system);
-  // std::vector<Process> test = system.Processes();
+  // NCursesDisplay::Display(system);
+  auto p = Process(1);
+  std::cout << LinuxParser::Command(1) << "\n";
   
 }
