@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "process.h"
+#include "linux_parser.h"
 
 using std::string;
 using std::to_string;
@@ -12,25 +13,37 @@ using std::vector;
 
 Process::Process(const int pid) {
     pid_ = pid;
+    user_ = LinuxParser::User(pid);
+    
+    // just for now
+    cpu_ = 0.f; 
+    uptime_ = 0;
+    ram_ = string();
+    cmd_ = LinuxParser::Command(pid);
+    // /bin/sh-c/usr/local/bin/start_desktop.sh
+
+    // TODO: these
+    // uptime_ = LinuxParser::UpTime(pid);
+    // cpu_ = LinuxParser::CpuUtilization(pid); ?
+    // ram_ = LinuxParser::Ram(pid);
+    // cmd_ = LinuxParser::Command(pid);
 }
 
-// TODO: Return this process's ID
 int Process::Pid() const { return pid_; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+float Process::CpuUtilization() { return cpu_; }
 
 // TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+string Process::Command() { return cmd_; }
 
 // TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+string Process::Ram() { return ram_; }
 
-// TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
+string Process::User() { return user_; }
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+long int Process::UpTime() { return uptime_; }
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
