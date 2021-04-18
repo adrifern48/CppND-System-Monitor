@@ -3,9 +3,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm> // might not need this
+#include <unistd.h>
 
 #include "linux_parser.h"
+#include "format.h"
 
 using std::stof;
 using std::string;
@@ -164,39 +165,79 @@ int LinuxParser::RunningProcesses() {
   return runningProcesses;
 }
 
-void replaceAll(string& str, const string& from, const string& to) {
-  if (from.empty())
-    return;
-  size_t start_pos = 0;
-  while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-    str.replace(start_pos, from.length(), to);
-    start_pos += to.length();
-  }
-}
-
-// TODO: Read and return the command associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
+// Read and return the command associated with a process
 string LinuxParser::Command(int pid) { 
   std::ifstream filestream(kProcDirectory + to_string(pid) + kCmdlineFilename);
   string cmd;
   if (filestream.is_open()) {
-    string line;
-    std::getline(filestream, line);
-    // replaceAll(line, {'\000'}, "");
-    // line.erase(std::find(line.begin(), line.end(), L'\000'), line.end());
-    cmd = line;
-      
-    // /bin/sh-c/usr/local/bin/start_desktop.sh but I only see /bin/sh
-    // reason is because there are \000 characters in the string so the first occurence acts as null terminator
-    // TODO: fix this! I tried above but it's not working
+    string cmd;
+    std::getline(filestream, cmd);
+    return cmd;
   }
 
-  return cmd; 
+  return string();
 }
 
-// TODO: Read and return the memory used by a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
+// Read and return the memory used by a process
+string LinuxParser::Ram(int pid) {
+  string key, value, line;
+  std::ifstream stream(kProcDirectory + to_string(pid) + kStatusFilename);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == "VmSize:")
+          return to_string(stol(value) / 1024); // convert KB to MB
+      }
+    }
+  }
+  
+  return string(); 
+
+}
+
+// TODO: figure out why processes are all displaying 0 cpu
+float LinuxParser::Cpu(int pid) {
+  std::ifstream stream(kProcDirectory + to_string(pid) + kStatFilename);
+  if (stream.is_open()) {
+    long uTime, sTime, cuTime, csTime, startTime;
+    string line, value;
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    for (int i = 1; i < 23; ++i) {
+      linestream >> value;
+      switch (i)
+      {
+      case 14:
+        uTime = stol(value);
+        break;
+      case 15:
+        sTime = stol(value);
+        break;
+      case 16:
+        cuTime = stol(value);
+        break;
+      case 17:
+        csTime = stol(value);
+        break;
+      case 22:
+        startTime = stol(value);
+        break;
+      default:
+        break;
+      }
+    }
+    auto sysUptime = UpTime();
+    auto totalTime = uTime + sTime;
+    totalTime = totalTime + cuTime + csTime;
+    auto seconds = sysUptime - (startTime / sysconf(_SC_CLK_TCK));
+    float cpu = 100 * ((totalTime / sysconf(_SC_CLK_TCK)) / seconds);
+    
+    return cpu;
+  }
+  
+  return 0.f;
+}
 
 //  Read and return the user ID associated with a process
 string LinuxParser::Uid(int pid) { 
@@ -237,6 +278,19 @@ string LinuxParser::User(int pid) {
   return user;
 }
 
-// TODO: Read and return the uptime of a process
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+// Read and return the uptime of a process
+long LinuxParser::UpTime(int pid) {
+  std::ifstream stream(kProcDirectory + to_string(pid) + kStatFilename);
+  if (stream.is_open()) {
+    string line, value;
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    for (int i = 0; i < 22; ++i)
+      linestream >> value;
+    linestream >> value;
+    long seconds = stol(value) / sysconf(_SC_CLK_TCK);
+    return stol(Format::ElapsedTime(seconds));
+  }
+  
+  return 0; 
+}
