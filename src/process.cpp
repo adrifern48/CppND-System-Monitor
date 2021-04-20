@@ -1,15 +1,11 @@
 #include <unistd.h>
 #include <cctype>
-#include <sstream>
 #include <string>
-#include <vector>
 
 #include "process.h"
 #include "linux_parser.h"
 
 using std::string;
-using std::to_string;
-using std::vector;
 
 Process::Process(const int pid) : pid_(pid) { }
 

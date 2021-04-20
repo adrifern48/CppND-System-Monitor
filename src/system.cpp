@@ -17,7 +17,9 @@ vector<Process>& System::Processes() {
     processes_.clear(); // clear all previous processes
     for (const auto& pid : pids) 
         processes_.emplace_back(Process(pid));
-    std::sort(processes_.begin(), processes_.end()); // sort by CPU utilization
+
+    // Sort by CPU utilization in descending order
+    std::sort(processes_.begin(), processes_.end());
 
     return processes_;
  }
