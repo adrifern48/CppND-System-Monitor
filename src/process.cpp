@@ -11,23 +11,20 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-Process::Process(const int pid) {
-    pid_ = pid;
-}
+Process::Process(const int pid) : pid_(pid) { }
 
 int Process::Pid() const { return pid_; }
 
-// TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return LinuxParser::Cpu(pid_); }
+float Process::CpuUtilization() const { return LinuxParser::Cpu(pid_); }
 
-string Process::Command() { return LinuxParser::Command(pid_); }
+string Process::Command() const { return LinuxParser::Command(pid_); }
 
-string Process::Ram() { return LinuxParser::Ram(pid_); } // TODO: figure out why it's not refreshing
+string Process::Ram() const { return LinuxParser::Ram(pid_); }
 
-string Process::User() { return LinuxParser::User(pid_); }
+string Process::User() const { return LinuxParser::User(pid_); }
 
-long int Process::UpTime() { return LinuxParser::UpTime(pid_); } // TODO: figure out why it's not refreshing
+long int Process::UpTime() const { return LinuxParser::UpTime(pid_); }
 
-// TODO: Overload the "less than" comparison operator for Process objects
-// REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+bool Process::operator<(Process const& a) const { 
+    return this->CpuUtilization() > a.CpuUtilization(); 
+}
